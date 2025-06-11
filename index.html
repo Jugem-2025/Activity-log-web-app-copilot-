@@ -12,29 +12,96 @@
       background: #f5f6fa;
       color: #333;
     }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #4a90e2;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 8px;
+    }
+    header h1 {
+      font-size: 1.4em;
+      margin: 0;
+    }
+    .top-icons a {
+      margin-left: 10px;
+      color: white;
+      font-size: 1.4em;
+      text-decoration: none;
+    }
+    .date-picker {
+      display: block;
+      margin: 16px 0;
+      font-size: 1em;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
     .hour-block {
       background: white;
       border: 1px solid #ddd;
       border-radius: 6px;
       margin-bottom: 12px;
-      padding: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .hour-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #f0f4f8;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .compact {
+      display: none;
+      padding: 10px 12px;
+      font-size: 0.95em;
+      color: #555;
+    }
+    .hour-content {
+      padding: 10px 12px;
+    }
+    .hour-content.hidden {
+      display: none;
     }
     .checkbox-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
+      margin-bottom: 8px;
     }
-    .checkbox-grid label {
+    .checkbox-grid .tag-item {
+      display: flex;
+      align-items: center;
       background: #e8f0fe;
       padding: 4px 8px;
       border-radius: 4px;
-      cursor: pointer;
       font-size: 0.95em;
-      display: flex;
-      align-items: center;
+      cursor: pointer;
     }
     .checkbox-grid input[type="checkbox"] {
       margin-right: 4px;
+    }
+    .flex-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .flex-row label {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+    .flex-row select,
+    .flex-row input[type="text"] {
+      padding: 6px;
+      font-size: 0.95em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
     .save-btn {
       background: #4a90e2;
@@ -44,69 +111,90 @@
       border-radius: 4px;
       cursor: pointer;
     }
+    .save-btn:hover {
+      background: #3b78c5;
+    }
+    .daily-note {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .daily-note label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+    }
+    .daily-note input[type="checkbox"] {
+      margin-right: 6px;
+    }
+    .daily-note textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      resize: vertical;
+    }
   </style>
 </head>
 <body>
-  <input type="date" id="recordDate">
-  <div id="recordArea"></div>
 
-  <script>
-    const defaultTags = ["起床","シャワー・風呂","朝食","昼食","夕食","外出","移動","個人課題"];
-    const recordArea = document.getElementById('recordArea');
+<header>
+  <h1>活動記録</h1>
+  <div class="top-icons">
+    <a href="#">🔍</a>
+    <a href="#">⚙️</a>
+  </div>
+</header>
 
-    function render() {
-      const dateStr = document.getElementById('recordDate').value;
-      const data = JSON.parse(localStorage.getItem(dateStr) || '{}');
-      recordArea.innerHTML = '';
+<input type="date" class="date-picker">
 
-      for (let i = 0; i < 24; i++) {
-        const hour = (i + 4) % 24;
-        const key = hour.toString().padStart(2,'0');
-        const entry = data[key] || { activity: [] };
+<div class="hour-block">
+  <div class="hour-header">やったこと</div>
+  <div class="hour-content">
+    <div class="checkbox-grid">
+      <label class="tag-item">
+        <input type="checkbox" id="task1"> 運動
+      </label>
+      <label class="tag-item">
+        <input type="checkbox" id="task2"> 読書
+      </label>
+      <label class="tag-item">
+        <input type="checkbox" id="task3"> 勉強
+      </label>
+      <label class="tag-item">
+        <input type="checkbox" id="task4"> 仕事
+      </label>
+      <label class="tag-item">
+        <input type="checkbox" id="task5"> 趣味
+      </label>
+    </div>
+  </div>
+</div>
 
-        const block = document.createElement('div');
-        block.className = 'hour-block';
+<div class="daily-note">
+  <label for="note">今日の振り返り</label>
+  <textarea id="note" rows="4"></textarea>
+</div>
 
-        const ckGrid = document.createElement('div');
-        ckGrid.className = 'checkbox-grid';
-        defaultTags.forEach(tag => {
-          const lbl = document.createElement('label');
-          const chk = document.createElement('input');
-          chk.type = 'checkbox';
-          chk.value = tag;
-          chk.checked = entry.activity.includes(tag);
-
-          chk.addEventListener('change', () => {
-            if (chk.checked) {
-              entry.activity.push(tag);
-            } else {
-              entry.activity = entry.activity.filter(t => t !== tag);
-            }
-            data[key] = entry;
-            localStorage.setItem(dateStr, JSON.stringify(data));
-          });
-
-          lbl.appendChild(chk);
-          lbl.appendChild(document.createTextNode(tag));
-          ckGrid.appendChild(lbl);
-        });
-
-        const btn = document.createElement('button');
-        btn.className = 'save-btn';
-        btn.textContent = '保存する';
-        btn.onclick = () => {
-          localStorage.setItem(dateStr, JSON.stringify(data));
-          alert("保存しました！");
-        };
-
-        block.append(ckGrid, btn);
-        recordArea.append(block);
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // チェックボックスの状態を復元
+    document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(checkbox => {
+      const savedState = localStorage.getItem(checkbox.id);
+      if (savedState !== null) {
+        checkbox.checked = savedState === "true";
       }
-    }
 
-    document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('recordDate').onchange = render;
-    render();
-  </script>
+      // チェックボックスのクリックイベントを監視
+      checkbox.addEventListener("change", function () {
+        localStorage.setItem(checkbox.id, checkbox.checked);
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
