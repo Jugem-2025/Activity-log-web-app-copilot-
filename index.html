@@ -31,42 +31,19 @@
       font-size: 1.4em;
       text-decoration: none;
     }
-    .date-picker {
+    .nav-link {
       display: block;
+      text-align: center;
       margin: 16px 0;
-      font-size: 1em;
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
+      padding: 10px;
+      background: #4a90e2;
+      color: white;
       border-radius: 6px;
+      text-decoration: none;
+      font-size: 1.1em;
     }
-    .hour-block {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .hour-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
-      background: #f0f4f8;
-      border-bottom: 1px solid #ddd;
-      cursor: pointer;
-    }
-    .compact {
-      display: none;
-      padding: 10px 12px;
-      font-size: 0.95em;
-      color: #555;
-    }
-    .hour-content {
-      padding: 10px 12px;
-    }
-    .hour-content.hidden {
-      display: none;
+    .nav-link:hover {
+      background: #3b78c5;
     }
     .checkbox-grid {
       display: flex;
@@ -86,57 +63,6 @@
     .checkbox-grid input[type="checkbox"] {
       margin-right: 4px;
     }
-    .flex-row {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .flex-row label {
-      font-weight: bold;
-      white-space: nowrap;
-    }
-    .flex-row select,
-    .flex-row input[type="text"] {
-      padding: 6px;
-      font-size: 0.95em;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .save-btn {
-      background: #4a90e2;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .save-btn:hover {
-      background: #3b78c5;
-    }
-    .daily-note {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .daily-note label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-    }
-    .daily-note input[type="checkbox"] {
-      margin-right: 6px;
-    }
-    .daily-note textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      resize: vertical;
-    }
   </style>
 </head>
 <body>
@@ -149,7 +75,8 @@
   </div>
 </header>
 
-<input type="date" class="date-picker">
+<!-- 週間表示ページへのリンク -->
+<a href="weekly.html" class="nav-link">週間表示へ ➡️</a>
 
 <div class="hour-block">
   <div class="hour-header">やったこと</div>
@@ -174,21 +101,13 @@
   </div>
 </div>
 
-<div class="daily-note">
-  <label for="note">今日の振り返り</label>
-  <textarea id="note" rows="4"></textarea>
-</div>
-
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-    // チェックボックスの状態を復元
     document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(checkbox => {
       const savedState = localStorage.getItem(checkbox.id);
       if (savedState !== null) {
         checkbox.checked = savedState === "true";
       }
-
-      // チェックボックスのクリックイベントを監視
       checkbox.addEventListener("change", function () {
         localStorage.setItem(checkbox.id, checkbox.checked);
       });
