@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>活動記録</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: auto;
+      background: #f5f6fa;
+      color: #333;
+    }
+    .hour-block {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      padding: 12px;
+    }
+    .checkbox-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .checkbox-grid label {
+      background: #e8f0fe;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.95em;
+      display: flex;
+      align-items: center;
+    }
+    .checkbox-grid input[type="checkbox"] {
+      margin-right: 4px;
+    }
+    .save-btn {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <input type="date" id="recordDate">
+  <div id="recordArea"></div>
+
+  <script>
+    const defaultTags = ["起床","シャワー・風呂","朝食","昼食","夕食","外出","移動","個人課題"];
+    const recordArea = document.getElementById('recordArea');
+
+    function render() {
+      const dateStr = document.getElementById('recordDate').value;
+      const data = JSON.parse(localStorage.getItem(dateStr) || '{}');
+      recordArea.innerHTML = '';
+
+      for (let i = 0; i < 24; i++) {
+        const hour = (i + 4) % 24;
+        const key = hour.toString().padStart(2,'0');
+        const entry = data[key] || { activity: [] };
+
+        const block = document.createElement('div');
+        block.className = 'hour-block';
+
+        const ckGrid = document.createElement('div');
+        ckGrid.className = 'checkbox-grid';
+        defaultTags.forEach(tag => {
+          const lbl = document.createElement('label');
+          const chk = document.createElement('input');
+          chk.type = 'checkbox';
+          chk.value = tag;
+          chk.checked = entry.activity.includes(tag);
+
+          chk.addEventListener('change', () => {
+            if (chk.checked) {
+              entry.activity.push(tag);
+            } else {
+              entry.activity = entry.activity.filter(t => t !== tag);
+            }
+            data[key] = entry;
+            localStorage.setItem(dateStr, JSON.stringify(data));
+          });
+
+          lbl.appendChild(chk);
+          lbl.appendChild(document.createTextNode(tag));
+          ckGrid.appendChild(lbl);
+        });
+
+        const btn = document.createElement('button');
+        btn.className = 'save-btn';
+        btn.textContent = '保存する';
+        btn.onclick = () => {
+          localStorage.setItem(dateStr, JSON.stringify(data));
+          alert("保存しました！");
+        };
+
+        block.append(ckGrid, btn);
+        recordArea.append(block);
+      }
+    }
+
+    document.getElementById('recordDate').value = new Date().toISOString().split('T')[0];
+    document.getElementById('recordDate').onchange = render;
+    render();
+  </script>
+</body>
+</html>
