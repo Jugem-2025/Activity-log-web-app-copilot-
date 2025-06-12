@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>週間表示</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 1em;
+    }
+    .nav-link {
+      display: block;
+      text-align: center;
+      margin: 16px 0;
+      padding: 10px;
+      background: #4a90e2;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 1.1em;
+    }
+    .nav-link:hover {
+      background: #3b78c5;
+    }
+    .week-grid {
+      display: grid;
+      grid-template-columns: 50px repeat(7, minmax(110px, 1fr));
+      border-collapse: collapse;
+      border: 1px solid #ccc;
+      overflow-x: auto;
+    }
+    .week-row {
+      display: contents;
+    }
+    .cell, .header {
+      border: 1px solid #ccc;
+      padding: 4px;
+      min-height: 40px;
+    }
+    .header {
+      font-weight: bold;
+      background-color: #f0f0f0;
+    }
+    .time-col {
+      background-color: #eee;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<h1>週間表示</h1>
+
+<!-- 活動記録ページへのリンク -->
+<a href="index.html" class="nav-link">⬅️ 活動記録へ戻る</a>
+
+<div class="week-grid" id="weekGrid">
+  <div class="header time-col">時間</div>
+</div>
+
+<script>
+  const hours = [...Array(24).keys()].map(i => (i + 4) % 24);
+  const days = [];
+  const today = new Date();
+  const dow = today.getDay() === 0 ? 6 : today.getDay() - 1;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - dow);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(d.getDate() + i);
+    days.push(d);
+  }
+
+  const weekGrid = document.getElementById("weekGrid");
+
+  days.forEach(date => {
+    const cell = document.createElement("div");
+    cell.className = "header";
+    cell.textContent = `${date.getMonth()+1}/${date.getDate()}(${["日","月","火","水","木","金","土"][date.getDay()]})`;
+    weekGrid.appendChild(cell);
+  });
+
+  for (let h = 0; h < 24; h++) {
+    const hour = hours[h];
+    const timeCell = document.createElement("div");
+    timeCell.className = "cell time-col";
+    timeCell.textContent = `${String(hour).padStart(2, "0")}:00`;
+    weekGrid.appendChild(timeCell);
+
+    for (let d = 0; d < 7; d++) {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      weekGrid.appendChild(cell);
+    }
+  }
+</script>
+
+</body>
+</html>
