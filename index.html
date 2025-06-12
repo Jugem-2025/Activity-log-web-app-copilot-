@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>活動記録</title>
   <style>
     body {
@@ -15,37 +15,25 @@
     }
     header {
       display: flex;
-      align-items: center;
       justify-content: space-between;
       background: #4a90e2;
       color: white;
-      padding: 12px 16px;
+      padding: 12px;
       border-radius: 8px;
-    }
-    header h1 {
-      font-size: 1.4em;
-      margin: 0;
-    }
-    .top-icons a, .nav-link {
-      color: white;
-      font-size: 1.4em;
-      text-decoration: none;
-      margin-left: 10px;
     }
     .date-picker {
       display: block;
       margin: 16px 0;
-      font-size: 1em;
-      width: 100%;
       padding: 8px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      font-size: 1em;
     }
     .checkbox-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .checkbox-grid label {
       display: flex;
@@ -53,41 +41,30 @@
       background: #e8f0fe;
       padding: 4px 8px;
       border-radius: 4px;
-      font-size: 0.95em;
     }
     .checkbox-grid input {
       margin-right: 4px;
     }
     .hour-block {
-      margin-bottom: 12px;
       border: 1px solid #ccc;
       border-radius: 6px;
       background: white;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .hour-header {
-      background: #f0f4f8;
-      padding: 8px;
-      font-weight: bold;
-      border-bottom: 1px solid #ccc;
-    }
-    .hour-content {
+      margin-bottom: 12px;
       padding: 10px;
     }
     .entry-row {
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
       align-items: center;
+      margin-bottom: 8px;
     }
     .entry-row label {
-      min-width: 60px;
+      min-width: 80px;
     }
-    .entry-row input, .entry-row select {
+    .entry-row input {
       flex: 1;
       padding: 4px;
-      font-size: 0.95em;
+      font-size: 1em;
     }
     .save-btn {
       background: #4a90e2;
@@ -102,9 +79,9 @@
       display: block;
       text-align: center;
       margin: 16px 0;
+      padding: 10px;
       background: #4a90e2;
       color: white;
-      padding: 10px;
       border-radius: 6px;
       text-decoration: none;
       font-weight: bold;
@@ -115,19 +92,15 @@
 
 <header>
   <h1>活動記録</h1>
-  <div class="top-icons">
-    <a href="weekly.html">📅</a>
-    <a href="#">⚙️</a>
-  </div>
+  <a href="weekly.html" class="nav-button">週間表示へ ➡️</a>
 </header>
 
 <input type="date" id="datePicker" class="date-picker">
 
-<a href="weekly.html" class="nav-button">週間表示へ ➡️</a>
-
+<!-- チェックボックスによるやったこと選択 -->
 <div class="hour-block">
-  <div class="hour-header">やったこと（チェック形式）</div>
-  <div class="hour-content checkbox-grid">
+  <h3>やったこと（チェック形式）</h3>
+  <div class="checkbox-grid">
     <label><input type="checkbox" id="task1">運動</label>
     <label><input type="checkbox" id="task2">読書</label>
     <label><input type="checkbox" id="task3">勉強</label>
@@ -156,35 +129,29 @@
       const hourBlock = document.createElement("div");
       hourBlock.className = "hour-block";
 
-      const header = document.createElement("div");
-      header.className = "hour-header";
+      const header = document.createElement("h3");
       header.textContent = `${hourStr}:00`;
 
       const content = document.createElement("div");
-      content.className = "hour-content";
 
-      const activity = document.createElement("input");
-      activity.type = "text";
-      activity.value = data[hourStr]?.activity?.join(", ") || '';
-      activity.placeholder = "やったこと（カンマ区切り）";
+      const activityText = document.createElement("input");
+      activityText.type = "text";
+      activityText.value = data[hourStr]?.activity || '';
+      activityText.placeholder = "自由記入のやったこと";
 
-      const mood = document.createElement("select");
-      ["", "😊", "😐", "😫"].forEach(val => {
-        const opt = document.createElement("option");
-        opt.value = val;
-        opt.textContent = val || "気分";
-        if (data[hourStr]?.mood === val) opt.selected = true;
-        mood.appendChild(opt);
-      });
+      const mood = document.createElement("input");
+      mood.type = "number";
+      mood.min = "1";
+      mood.max = "10";
+      mood.value = data[hourStr]?.mood || '';
+      mood.placeholder = "気分（1〜10）";
 
-      const fatigue = document.createElement("select");
-      ["", "元気", "普通", "疲れた"].forEach(val => {
-        const opt = document.createElement("option");
-        opt.value = val;
-        opt.textContent = val || "疲労度";
-        if (data[hourStr]?.fatigue === val) opt.selected = true;
-        fatigue.appendChild(opt);
-      });
+      const fatigue = document.createElement("input");
+      fatigue.type = "number";
+      fatigue.min = "1";
+      fatigue.max = "10";
+      fatigue.value = data[hourStr]?.fatigue || '';
+      fatigue.placeholder = "疲労度（1〜10）";
 
       const save = document.createElement("button");
       save.className = "save-btn";
@@ -192,14 +159,14 @@
       save.onclick = () => {
         const current = JSON.parse(localStorage.getItem(dateKey) || '{}');
         current[hourStr] = {
-          activity: activity.value.split(",").map(s => s.trim()).filter(Boolean),
+          activity: activityText.value,
           mood: mood.value,
           fatigue: fatigue.value
         };
         localStorage.setItem(dateKey, JSON.stringify(current));
       };
 
-      [["やったこと", activity], ["気分", mood], ["疲労度", fatigue]].forEach(([labelText, input]) => {
+      [["やったこと", activityText], ["気分", mood], ["疲労度", fatigue]].forEach(([labelText, input]) => {
         const row = document.createElement("div");
         row.className = "entry-row";
         const label = document.createElement("label");
@@ -218,15 +185,7 @@
 
   datePicker.valueAsDate = new Date();
   datePicker.addEventListener("change", loadLogs);
-  window.addEventListener("DOMContentLoaded", () => {
-    // 復元チェック状態
-    document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(cb => {
-      const val = localStorage.getItem(cb.id);
-      if (val !== null) cb.checked = val === "true";
-      cb.addEventListener("change", () => localStorage.setItem(cb.id, cb.checked));
-    });
-    loadLogs();
-  });
+  window.addEventListener("DOMContentLoaded", loadLogs);
 </script>
 
 </body>
