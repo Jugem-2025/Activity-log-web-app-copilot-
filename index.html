@@ -7,10 +7,11 @@
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       background: #f5f6fa;
       color: #333;
+      padding: 1em;
     }
     header {
       display: flex;
@@ -25,43 +26,88 @@
       font-size: 1.4em;
       margin: 0;
     }
-    .top-icons a {
-      margin-left: 10px;
+    .top-icons a, .nav-link {
       color: white;
       font-size: 1.4em;
       text-decoration: none;
+      margin-left: 10px;
     }
-    .nav-link {
+    .date-picker {
       display: block;
-      text-align: center;
       margin: 16px 0;
-      padding: 10px;
-      background: #4a90e2;
-      color: white;
+      font-size: 1em;
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
       border-radius: 6px;
-      text-decoration: none;
-      font-size: 1.1em;
-    }
-    .nav-link:hover {
-      background: #3b78c5;
     }
     .checkbox-grid {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-bottom: 8px;
+      margin-bottom: 16px;
     }
-    .checkbox-grid .tag-item {
+    .checkbox-grid label {
       display: flex;
       align-items: center;
       background: #e8f0fe;
       padding: 4px 8px;
       border-radius: 4px;
       font-size: 0.95em;
-      cursor: pointer;
     }
-    .checkbox-grid input[type="checkbox"] {
+    .checkbox-grid input {
       margin-right: 4px;
+    }
+    .hour-block {
+      margin-bottom: 12px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .hour-header {
+      background: #f0f4f8;
+      padding: 8px;
+      font-weight: bold;
+      border-bottom: 1px solid #ccc;
+    }
+    .hour-content {
+      padding: 10px;
+    }
+    .entry-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+      align-items: center;
+    }
+    .entry-row label {
+      min-width: 60px;
+    }
+    .entry-row input, .entry-row select {
+      flex: 1;
+      padding: 4px;
+      font-size: 0.95em;
+    }
+    .save-btn {
+      background: #4a90e2;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 6px;
+    }
+    .nav-button {
+      display: block;
+      text-align: center;
+      margin: 16px 0;
+      background: #4a90e2;
+      color: white;
+      padding: 10px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -70,48 +116,116 @@
 <header>
   <h1>活動記録</h1>
   <div class="top-icons">
-    <a href="#">🔍</a>
+    <a href="weekly.html">📅</a>
     <a href="#">⚙️</a>
   </div>
 </header>
 
-<!-- 週間表示ページへのリンク -->
-<a href="weekly.html" class="nav-link">週間表示へ ➡️</a>
+<input type="date" id="datePicker" class="date-picker">
+
+<a href="weekly.html" class="nav-button">週間表示へ ➡️</a>
 
 <div class="hour-block">
-  <div class="hour-header">やったこと</div>
-  <div class="hour-content">
-    <div class="checkbox-grid">
-      <label class="tag-item">
-        <input type="checkbox" id="task1"> 運動
-      </label>
-      <label class="tag-item">
-        <input type="checkbox" id="task2"> 読書
-      </label>
-      <label class="tag-item">
-        <input type="checkbox" id="task3"> 勉強
-      </label>
-      <label class="tag-item">
-        <input type="checkbox" id="task4"> 仕事
-      </label>
-      <label class="tag-item">
-        <input type="checkbox" id="task5"> 趣味
-      </label>
-    </div>
+  <div class="hour-header">やったこと（チェック形式）</div>
+  <div class="hour-content checkbox-grid">
+    <label><input type="checkbox" id="task1">運動</label>
+    <label><input type="checkbox" id="task2">読書</label>
+    <label><input type="checkbox" id="task3">勉強</label>
+    <label><input type="checkbox" id="task4">仕事</label>
+    <label><input type="checkbox" id="task5">趣味</label>
   </div>
 </div>
 
+<div id="logEntries"></div>
+
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(checkbox => {
-      const savedState = localStorage.getItem(checkbox.id);
-      if (savedState !== null) {
-        checkbox.checked = savedState === "true";
-      }
-      checkbox.addEventListener("change", function () {
-        localStorage.setItem(checkbox.id, checkbox.checked);
+  const startHour = 4;
+  const hours = [...Array(24).keys()].map(i => (i + startHour) % 24);
+  const datePicker = document.getElementById("datePicker");
+  const logEntries = document.getElementById("logEntries");
+
+  const getDateKey = () => datePicker.value || new Date().toISOString().split("T")[0];
+
+  function loadLogs() {
+    logEntries.innerHTML = '';
+    const dateKey = getDateKey();
+    const data = JSON.parse(localStorage.getItem(dateKey) || '{}');
+
+    hours.forEach(h => {
+      const hourStr = String(h).padStart(2, '0');
+      const hourBlock = document.createElement("div");
+      hourBlock.className = "hour-block";
+
+      const header = document.createElement("div");
+      header.className = "hour-header";
+      header.textContent = `${hourStr}:00`;
+
+      const content = document.createElement("div");
+      content.className = "hour-content";
+
+      const activity = document.createElement("input");
+      activity.type = "text";
+      activity.value = data[hourStr]?.activity?.join(", ") || '';
+      activity.placeholder = "やったこと（カンマ区切り）";
+
+      const mood = document.createElement("select");
+      ["", "😊", "😐", "😫"].forEach(val => {
+        const opt = document.createElement("option");
+        opt.value = val;
+        opt.textContent = val || "気分";
+        if (data[hourStr]?.mood === val) opt.selected = true;
+        mood.appendChild(opt);
       });
+
+      const fatigue = document.createElement("select");
+      ["", "元気", "普通", "疲れた"].forEach(val => {
+        const opt = document.createElement("option");
+        opt.value = val;
+        opt.textContent = val || "疲労度";
+        if (data[hourStr]?.fatigue === val) opt.selected = true;
+        fatigue.appendChild(opt);
+      });
+
+      const save = document.createElement("button");
+      save.className = "save-btn";
+      save.textContent = "保存";
+      save.onclick = () => {
+        const current = JSON.parse(localStorage.getItem(dateKey) || '{}');
+        current[hourStr] = {
+          activity: activity.value.split(",").map(s => s.trim()).filter(Boolean),
+          mood: mood.value,
+          fatigue: fatigue.value
+        };
+        localStorage.setItem(dateKey, JSON.stringify(current));
+      };
+
+      [["やったこと", activity], ["気分", mood], ["疲労度", fatigue]].forEach(([labelText, input]) => {
+        const row = document.createElement("div");
+        row.className = "entry-row";
+        const label = document.createElement("label");
+        label.textContent = labelText;
+        row.appendChild(label);
+        row.appendChild(input);
+        content.appendChild(row);
+      });
+
+      content.appendChild(save);
+      hourBlock.appendChild(header);
+      hourBlock.appendChild(content);
+      logEntries.appendChild(hourBlock);
     });
+  }
+
+  datePicker.valueAsDate = new Date();
+  datePicker.addEventListener("change", loadLogs);
+  window.addEventListener("DOMContentLoaded", () => {
+    // 復元チェック状態
+    document.querySelectorAll('.checkbox-grid input[type="checkbox"]').forEach(cb => {
+      const val = localStorage.getItem(cb.id);
+      if (val !== null) cb.checked = val === "true";
+      cb.addEventListener("change", () => localStorage.setItem(cb.id, cb.checked));
+    });
+    loadLogs();
   });
 </script>
 
