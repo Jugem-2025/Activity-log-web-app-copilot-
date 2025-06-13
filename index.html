@@ -35,6 +35,13 @@
       border-radius: 6px;
       font-size: 1em;
     }
+    .hour-block {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+      margin-bottom: 12px;
+      padding: 10px;
+    }
     .checkbox-grid {
       display: flex;
       flex-wrap: wrap;
@@ -48,13 +55,6 @@
       padding: 4px 8px;
       border-radius: 4px;
     }
-    .hour-block {
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      background: white;
-      margin-bottom: 12px;
-      padding: 10px;
-    }
     .entry-row {
       display: flex;
       gap: 8px;
@@ -64,7 +64,7 @@
     .entry-row label {
       min-width: 80px;
     }
-    .entry-row input {
+    .entry-row input, .entry-row textarea {
       flex: 1;
       padding: 4px;
       font-size: 1em;
@@ -105,6 +105,21 @@
 
 <div id="logEntries"></div>
 
+<!-- 最下部の入力欄 -->
+<div class="hour-block">
+  <h3>摂取状況</h3>
+  <div class="checkbox-grid">
+    <label><input type="checkbox" id="alcohol">アルコール</label>
+    <label><input type="checkbox" id="caffeine">カフェイン</label>
+  </div>
+  <textarea id="intakeDetails" placeholder="摂取した飲料と量を記入"></textarea>
+</div>
+
+<div class="hour-block">
+  <h3>メモ</h3>
+  <textarea id="memo" placeholder="自由記入"></textarea>
+</div>
+
 <script>
   const startHour = 4;
   const hours = [...Array(24).keys()].map(i => (i + startHour) % 24);
@@ -128,50 +143,76 @@
 
       const content = document.createElement("div");
 
+      // やったこと（チェックボックス）
+      const activityCheckboxes = [
+        "起床", "シャワー・風呂", "朝食", "昼食", "夕食", "外出", "移動",
+        "個人課題", "講義", "帰宅", "家事", "休憩", "就寝", "薬", "睡眠"
+      ];
+      const checkboxGrid = document.createElement("div");
+      checkboxGrid.className = "checkbox-grid";
+
+      activityCheckboxes.forEach(activity => {
+        const label = document.createElement("label");
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.value = activity;
+        checkbox.checked = data[hourStr]?.activities?.includes(activity) || false;
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(activity));
+        checkboxGrid.appendChild(label);
+      });
+
+      // 自由記入欄
       const activityText = document.createElement("input");
       activityText.type = "text";
-      activityText.value = data[hourStr]?.activity || '';
+      activityText.value = data[hourStr]?.activityText || '';
       activityText.placeholder = "自由記入のやったこと";
 
+      // 気分・疲労度（スライダー）
       const mood = document.createElement("input");
-      mood.type = "number";
+      mood.type = "range";
       mood.min = "0";
       mood.max = "100";
       mood.step = "5";
-      mood.value = data[hourStr]?.mood || '';
-      mood.placeholder = "気分（0〜100）";
+      mood.value = data[hourStr]?.mood || "50";
 
       const fatigue = document.createElement("input");
-      fatigue.type = "number";
+      fatigue.type = "range";
       fatigue.min = "0";
       fatigue.max = "100";
       fatigue.step = "5";
-      fatigue.value = data[hourStr]?.fatigue || '';
-      fatigue.placeholder = "疲労度（0〜100）";
+      fatigue.value = data[hourStr]?.fatigue || "50";
 
+      // 「睡眠」を選んだら気分・疲労度を空欄にする
+      checkboxGrid.addEventListener("change", () => {
+        const sleepSelected = [...checkboxGrid.querySelectorAll("input")].some(cb => cb.checked && cb.value === "睡眠");
+        mood.disabled = sleepSelected;
+        fatigue.disabled = sleepSelected;
+        if (sleepSelected) {
+          mood.value = "";
+          fatigue.value = "";
+        }
+      });
+
+      // 保存ボタン
       const save = document.createElement("button");
       save.className = "save-btn";
       save.textContent = "保存";
       save.onclick = () => {
         const current = JSON.parse(localStorage.getItem(dateKey) || '{}');
         current[hourStr] = {
-          activity: activityText.value,
+          activities: [...checkboxGrid.querySelectorAll("input:checked")].map(cb => cb.value),
+          activityText: activityText.value,
           mood: mood.value,
           fatigue: fatigue.value
         };
         localStorage.setItem(dateKey, JSON.stringify(current));
       };
 
-      [["やったこと", activityText], ["気分", mood], ["疲労度", fatigue]].forEach(([labelText, input]) => {
-        const row = document.createElement("div");
-        row.className = "entry-row";
-        const label = document.createElement("label");
-        label.textContent = labelText;
-        row.appendChild(label);
-        row.appendChild(input);
-        content.appendChild(row);
-      });
-
+      content.appendChild(checkboxGrid);
+      content.appendChild(activityText);
+      content.appendChild(mood);
+      content.appendChild(fatigue);
       content.appendChild(save);
       hourBlock.appendChild(header);
       hourBlock.appendChild(content);
