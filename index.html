@@ -21,6 +21,12 @@
       padding: 12px;
       border-radius: 8px;
     }
+    .top-icons a {
+      color: white;
+      font-size: 1.4em;
+      text-decoration: none;
+      margin-left: 10px;
+    }
     .date-picker {
       display: block;
       margin: 16px 0;
@@ -41,9 +47,6 @@
       background: #e8f0fe;
       padding: 4px 8px;
       border-radius: 4px;
-    }
-    .checkbox-grid input {
-      margin-right: 4px;
     }
     .hour-block {
       border: 1px solid #ccc;
@@ -92,22 +95,13 @@
 
 <header>
   <h1>活動記録</h1>
-  <a href="weekly.html" class="nav-button">週間表示へ ➡️</a>
+  <div class="top-icons">
+    <a href="weekly.html">📅</a>
+    <a href="tags.html">⚙️</a>
+  </div>
 </header>
 
 <input type="date" id="datePicker" class="date-picker">
-
-<!-- チェックボックスによるやったこと選択 -->
-<div class="hour-block">
-  <h3>やったこと（チェック形式）</h3>
-  <div class="checkbox-grid">
-    <label><input type="checkbox" id="task1">運動</label>
-    <label><input type="checkbox" id="task2">読書</label>
-    <label><input type="checkbox" id="task3">勉強</label>
-    <label><input type="checkbox" id="task4">仕事</label>
-    <label><input type="checkbox" id="task5">趣味</label>
-  </div>
-</div>
 
 <div id="logEntries"></div>
 
@@ -141,17 +135,19 @@
 
       const mood = document.createElement("input");
       mood.type = "number";
-      mood.min = "1";
-      mood.max = "10";
+      mood.min = "0";
+      mood.max = "100";
+      mood.step = "5";
       mood.value = data[hourStr]?.mood || '';
-      mood.placeholder = "気分（1〜10）";
+      mood.placeholder = "気分（0〜100）";
 
       const fatigue = document.createElement("input");
       fatigue.type = "number";
-      fatigue.min = "1";
-      fatigue.max = "10";
+      fatigue.min = "0";
+      fatigue.max = "100";
+      fatigue.step = "5";
       fatigue.value = data[hourStr]?.fatigue || '';
-      fatigue.placeholder = "疲労度（1〜10）";
+      fatigue.placeholder = "疲労度（0〜100）";
 
       const save = document.createElement("button");
       save.className = "save-btn";
