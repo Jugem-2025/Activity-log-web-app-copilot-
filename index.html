@@ -168,20 +168,20 @@
       activityText.value = data[hourStr]?.activityText || '';
       activityText.placeholder = "自由記入のやったこと";
 
-      // 気分・疲労度（スライダー）
+      // 気分・疲労度（数値入力）
       const mood = document.createElement("input");
-      mood.type = "range";
+      mood.type = "number";
       mood.min = "0";
       mood.max = "100";
       mood.step = "5";
-      mood.value = data[hourStr]?.mood || "50";
+      mood.value = data[hourStr]?.mood || '';
 
       const fatigue = document.createElement("input");
-      fatigue.type = "range";
+      fatigue.type = "number";
       fatigue.min = "0";
       fatigue.max = "100";
       fatigue.step = "5";
-      fatigue.value = data[hourStr]?.fatigue || "50";
+      fatigue.value = data[hourStr]?.fatigue || '';
 
       // 「睡眠」を選んだら気分・疲労度を空欄にする
       checkboxGrid.addEventListener("change", () => {
